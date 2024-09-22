@@ -1,9 +1,14 @@
+using MinimalAPI.Interfaces;
+using MinimalAPI.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddSingleton<ISayHello, SayHello>();
 
 var app = builder.Build();
 
@@ -24,9 +29,9 @@ weatherGroup.MapGet("/weatherforecast", WeatherForecastProcess)
 .WithTags("Weather")
 .WithOpenApi();
 
-othersGroup.MapGet("/Teste", () =>
+othersGroup.MapGet("/Teste", (ISayHello sayHello) =>
 {
-	Results.Accepted("Olá.");
+	return Results.Accepted(sayHello.BoasVindas());
 })
 .WithName("Teste")
 .WithTags("Others")
