@@ -16,13 +16,31 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-	"Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+var weatherGroup = app.MapGroup("/Weather");
+var othersGroup = app.MapGroup("/Others");
 
-app.MapGet("/weatherforecast", () =>
+weatherGroup.MapGet("/weatherforecast", WeatherForecastProcess)
+.WithName("GetWeatherForecast")
+.WithTags("Weather")
+.WithOpenApi();
+
+othersGroup.MapGet("/Teste", () =>
 {
+	Results.Accepted("Olá.");
+})
+.WithName("Teste")
+.WithTags("Others")
+.WithOpenApi();
+
+app.Run();
+
+static IResult WeatherForecastProcess()
+{
+	var summaries = new[]
+	{
+		"Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+	};
+
 	var forecast = Enumerable.Range(1, 5).Select(index =>
 		new WeatherForecast
 		(
@@ -31,12 +49,9 @@ app.MapGet("/weatherforecast", () =>
 			summaries[Random.Shared.Next(summaries.Length)]
 		))
 		.ToArray();
-	return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
 
-app.Run();
+	return TypedResults.Ok(forecast);
+}
 
 internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
